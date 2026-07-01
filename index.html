@@ -1,0 +1,1411 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <title>永森健康管理</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    :root {
+      --bg:#f0f4f8;--surface:#fff;--surface-2:#f7f9fc;--surface-3:#edf1f6;
+      --border:rgba(0,0,0,0.07);--border-2:rgba(0,0,0,0.11);
+      --text:#111827;--text-sub:#4b5563;--text-muted:#9ca3af;
+      --green:#10a96e;--green-light:#d1fae5;--green-dim:rgba(16,169,110,0.10);
+      --red:#ef4444;--red-dim:rgba(239,68,68,0.10);
+      --amber:#f59e0b;--amber-dim:rgba(245,158,11,0.10);
+      --blue:#3b82f6;--blue-dim:rgba(59,130,246,0.10);
+      --radius-sm:10px;--radius-md:16px;--radius-lg:20px;--radius-xl:28px;
+      --shadow:0 8px 32px rgba(0,0,0,0.08),0 2px 8px rgba(0,0,0,0.04);
+      --shadow-sm:0 2px 12px rgba(0,0,0,0.06);
+      --shadow-card:0 1px 3px rgba(0,0,0,0.06),0 4px 16px rgba(0,0,0,0.05);
+      --font:'DM Sans',sans-serif;--font-mono:'DM Mono',monospace;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+    html{scroll-behavior:smooth}
+    body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
+    .hidden{display:none!important}
+
+    /* ─── LOGIN ─── */
+    #loginView{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;background:linear-gradient(160deg,#f0fdf4 0%,#eff6ff 50%,#fafafa 100%)}
+    .login-wrap{width:100%;max-width:360px;animation:fadeUp .6s cubic-bezier(.16,1,.3,1) both}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(28px)}to{opacity:1;transform:none}}
+    .login-logo-wrap{display:flex;justify-content:center;margin-bottom:28px}
+    .login-logo{width:68px;height:68px;border-radius:22px;background:linear-gradient(135deg,#10a96e,#059669);display:flex;align-items:center;justify-content:center;font-size:30px;box-shadow:0 12px 32px rgba(16,169,110,.30)}
+    .login-title{font-size:26px;font-weight:700;text-align:center;letter-spacing:-.5px;margin-bottom:6px}
+    .login-sub{font-size:13px;color:var(--text-sub);text-align:center;margin-bottom:32px}
+    .login-card{background:var(--surface);border-radius:var(--radius-xl);padding:32px 28px;box-shadow:var(--shadow);border:1px solid var(--border)}
+    .pin-label{font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--text-muted);margin-bottom:10px}
+    .login-input{width:100%;padding:18px 20px;background:var(--surface-2);border:1.5px solid var(--border-2);border-radius:var(--radius-md);font-size:32px;font-family:var(--font-mono);letter-spacing:.5em;text-align:center;font-weight:500;color:var(--green);outline:none;transition:border-color .2s,box-shadow .2s;margin-bottom:18px;caret-color:var(--green)}
+    .login-input:focus{border-color:var(--green);box-shadow:0 0 0 3px rgba(16,169,110,.12);background:#fff}
+    .login-input::placeholder{color:var(--text-muted);letter-spacing:.2em;font-size:22px}
+    .login-btn{width:100%;padding:17px;background:linear-gradient(135deg,#10a96e,#059669);color:#fff;border:none;border-radius:var(--radius-md);font-family:var(--font);font-size:15px;font-weight:700;cursor:pointer;transition:all .2s;box-shadow:0 6px 20px rgba(16,169,110,.28)}
+    .login-btn:hover{transform:translateY(-1px);box-shadow:0 10px 28px rgba(16,169,110,.35)}
+    .login-btn:active{transform:scale(.98)}
+    .login-btn:disabled{opacity:.55;cursor:not-allowed;transform:none;box-shadow:none}
+    .login-err{margin-top:14px;font-size:13px;color:var(--red);text-align:center;min-height:18px;font-weight:500}
+
+    /* ─── MAIN ─── */
+    #mainView{animation:fadeIn .4s ease both}
+    @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+
+    /* ─── HEADER ─── */
+    .sticky-shell{position:sticky;top:0;z-index:20;background:var(--surface)}
+    .header{background:var(--surface);border-bottom:1px solid var(--border);padding:0 20px;box-shadow:0 1px 0 var(--border),0 2px 12px rgba(0,0,0,.04)}
+    .header-inner{max-width:560px;margin:0 auto;padding:14px 0}
+    .header-row1{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+    .greeting{font-size:14px;color:var(--text-sub)}
+    .greeting strong{color:var(--text);font-weight:700}
+    .logout-btn{background:none;border:1.5px solid var(--border-2);color:var(--text-muted);padding:5px 13px;border-radius:99px;font-size:11px;font-family:var(--font);cursor:pointer;transition:all .2s;font-weight:600}
+    .logout-btn:hover{border-color:var(--red);color:var(--red);background:var(--red-dim)}
+    .header-stats{display:flex;align-items:center;gap:20px}
+    .ring-wrap{position:relative;flex-shrink:0;width:88px;height:88px;--glow-color:var(--green)}
+    .ring-svg{width:88px;height:88px;transform:rotate(-90deg);filter:drop-shadow(0 0 6px var(--glow-color))}
+    .ring-bg{fill:none;stroke:var(--surface-3);stroke-width:8}
+    .ring-fill{fill:none;stroke-width:8;stroke-linecap:round;transition:stroke-dashoffset 1.2s cubic-bezier(.16,1,.3,1),stroke 0.4s;stroke-dasharray:226.19;stroke-dashoffset:226.19}
+    .ring-wrap.breathing .ring-svg{animation:breathe 2.5s ease-in-out infinite}
+    .ring-wrap.over.breathing .ring-svg{animation-duration:1.2s}
+    @keyframes breathe{0%,100%{filter:drop-shadow(0 0 4px var(--glow-color));transform:rotate(-90deg) scale(1)}50%{filter:drop-shadow(0 0 12px var(--glow-color));transform:rotate(-90deg) scale(1.02)}}
+    .ring-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:2}
+    .ring-pct{font-size:15px;font-weight:700;font-family:var(--font-mono);color:var(--green);line-height:1;transition:color 0.4s}
+    .ring-pct.warn{color:var(--amber)}
+    .ring-pct.over{color:var(--red)}
+    .ring-label{font-size:9px;color:var(--text-muted);font-weight:600;letter-spacing:.05em;margin-top:2px}
+    .stat-stack{flex:1;display:flex;flex-direction:column;gap:9px}
+    .stat-row-item{display:flex;align-items:baseline;gap:6px}
+    .stat-tag{font-size:10px;color:var(--text-muted);font-weight:700;letter-spacing:.06em;text-transform:uppercase;min-width:36px}
+    .stat-val{font-size:22px;font-weight:700;font-family:var(--font-mono);color:var(--text);line-height:1}
+    .stat-val.green{color:var(--green)}
+    .stat-val.blue{color:var(--blue)}
+    .stat-val.red{color:var(--red)}
+    .stat-val.amber{color:var(--amber)}
+    .stat-unit{font-size:11px;color:var(--text-muted);font-weight:500}
+    .streak-badge{display:inline-flex;align-items:center;gap:5px;background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.25);border-radius:99px;padding:4px 10px;font-size:12px;font-weight:700;color:#92400e}
+
+    /* ─── TAB NAV ─── */
+    .tab-nav-wrap{background:var(--surface);border-bottom:1px solid var(--border)}
+    .tab-nav{max-width:560px;margin:0 auto;display:flex;padding:0 20px}
+    .tab-btn{flex:1;padding:10px 4px;background:none;border:none;font-family:var(--font);font-size:13px;font-weight:600;color:var(--text-muted);cursor:pointer;transition:all .2s;border-bottom:2px solid transparent;display:flex;align-items:center;justify-content:center;gap:6px;line-height:1.2;text-align:center}
+    .tab-btn.active{color:var(--green);border-bottom-color:var(--green)}
+    .tab-icon{font-size:14px;flex-shrink:0}
+
+    /* ─── CONTENT ─── */
+    .content{max-width:560px;margin:0 auto;padding:20px 16px 80px;display:flex;flex-direction:column;gap:14px}
+    .tab-pane{display:none;flex-direction:column;gap:14px}
+    .tab-pane.active{display:flex}
+
+    /* ─── CARD ─── */
+    .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px;box-shadow:var(--shadow-card)}
+    .card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+    .card-title{font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--text-muted)}
+    .card-badge{font-size:10px;font-family:var(--font-mono);padding:3px 9px;border-radius:99px;background:var(--green-dim);color:var(--green);font-weight:600}
+
+    /* ─── SKELETON ─── */
+    .skeleton{background:linear-gradient(90deg,var(--surface-3) 25%,var(--surface-2) 50%,var(--surface-3) 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:6px}
+    @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+    .chart-skeleton{height:160px;display:flex;align-items:flex-end;gap:10px;padding:0 4px}
+    .chart-skel-bar{flex:1;border-radius:6px 6px 0 0}
+    .skel-row{display:flex;align-items:center;gap:12px;padding:12px 4px;border-bottom:1px solid var(--border)}
+    .skel-row:last-child{border-bottom:none}
+    .chart-wrap{height:160px;position:relative}
+    .chart-wrap canvas{transition:opacity .3s}
+    .chart-wrap.loading canvas{opacity:0;position:absolute}
+
+    /* ─── TODAY LOG ─── */
+    .log-empty{text-align:center;padding:28px 0 20px;color:var(--text-muted);font-size:13px}
+    .log-empty-icon{font-size:32px;margin-bottom:10px;opacity:.5}
+    .log-list{display:flex;flex-direction:column}
+    .log-item{display:flex;align-items:center;gap:12px;padding:12px 4px;border-bottom:1px solid var(--border);animation:slideIn .3s ease both}
+    .log-item:last-child{border-bottom:none}
+    @keyframes slideIn{from{opacity:0;transform:translateX(-8px)}to{opacity:1;transform:none}}
+    .log-dot{width:7px;height:7px;border-radius:50%;background:var(--green);flex-shrink:0}
+    .log-name{flex:1;font-size:14px;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .log-time{font-size:11px;color:var(--text-muted);font-family:var(--font-mono);flex-shrink:0}
+    .log-cal{font-size:13px;font-family:var(--font-mono);font-weight:600;color:var(--green);white-space:nowrap}
+
+    /* ─── INPUT CARD ─── */
+    .input-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-xl);padding:24px 20px;box-shadow:var(--shadow)}
+    .section-title{font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--text-muted);margin-bottom:14px}
+    .food-input{width:100%;padding:13px 15px;background:var(--surface-2);border:1.5px solid var(--border-2);border-radius:var(--radius-md);font-family:var(--font);font-size:14px;color:var(--text);resize:none;outline:none;line-height:1.7;transition:border-color .2s,box-shadow .2s;margin-bottom:12px}
+    .food-input:focus{border-color:var(--green);background:#fff;box-shadow:0 0 0 3px rgba(16,169,110,.08)}
+    .food-input::placeholder{color:var(--text-muted)}
+    .ai-row{display:flex;gap:8px;margin-bottom:16px}
+    .ai-btn{flex:1;padding:12px;background:var(--blue-dim);border:1.5px solid rgba(59,130,246,.20);border-radius:var(--radius-md);font-family:var(--font);font-size:13px;font-weight:600;color:var(--blue);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:all .2s}
+    .ai-btn:hover{background:rgba(59,130,246,.16);border-color:rgba(59,130,246,.35)}
+    .ai-btn:disabled{opacity:.5;cursor:not-allowed}
+    .retry-btn{padding:12px 14px;background:var(--red-dim);border:1.5px solid rgba(239,68,68,.20);border-radius:var(--radius-md);font-family:var(--font);font-size:13px;font-weight:700;color:var(--red);cursor:pointer;transition:all .2s;white-space:nowrap}
+    .retry-btn:hover{background:rgba(239,68,68,.16)}
+
+    /* ─── IMAGE UPLOAD ─── */
+    .img-upload-area{border:2px dashed var(--border-2);border-radius:var(--radius-md);padding:20px;text-align:center;cursor:pointer;transition:all .2s;margin-bottom:12px;position:relative;overflow:hidden}
+    .img-upload-area:hover{border-color:var(--green);background:var(--green-dim)}
+    .img-upload-area.has-img{border-style:solid;border-color:var(--green);padding:0}
+    .img-upload-area input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;z-index:10}
+    .img-preview{width:100%;max-height:200px;object-fit:cover;border-radius:var(--radius-md);display:none}
+    .img-preview.show{display:block}
+    .img-placeholder{pointer-events:auto}
+    .img-placeholder-icon{font-size:28px;margin-bottom:6px}
+    .img-placeholder-text{font-size:13px;font-weight:600;color:var(--text-sub)}
+    .img-placeholder-sub{font-size:11px;color:var(--text-muted);margin-top:3px}
+    .img-mode-toggle{display:flex;background:var(--surface-3);border-radius:var(--radius-sm);padding:3px;margin-bottom:14px;gap:3px}
+    .img-mode-btn{flex:1;padding:8px;background:none;border:none;border-radius:7px;font-family:var(--font);font-size:12px;font-weight:600;color:var(--text-muted);cursor:pointer;transition:all .2s}
+    .img-mode-btn.active{background:var(--surface);color:var(--text);box-shadow:var(--shadow-sm)}
+
+    .calrow{display:grid;grid-template-columns:130px 1fr;gap:12px;margin-bottom:20px}
+    .field-label{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted);margin-bottom:7px}
+    .cal-input{width:100%;padding:13px;background:var(--surface-2);border:1.5px solid var(--border-2);border-radius:var(--radius-md);font-size:24px;font-weight:700;font-family:var(--font-mono);text-align:center;color:var(--green);outline:none;transition:border-color .2s}
+    .cal-input:focus{border-color:var(--green);background:#fff}
+    .cal-input::-webkit-inner-spin-button,.cal-input::-webkit-outer-spin-button{-webkit-appearance:none}
+    .note-box{padding:16px 18px;background:var(--green-light);border:1px solid rgba(16,169,110,.15);border-radius:var(--radius-md);font-size:15px;color:#065f46;line-height:1.7;min-height:68px;white-space:pre-wrap}
+    .note-box.error{background:var(--red-dim);border-color:rgba(239,68,68,.2);color:var(--red)}
+
+    /* ─── MODAL ─── */
+    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:999;display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity .2s}
+    .modal-overlay.show{opacity:1;pointer-events:auto}
+    .modal-card{width:100%;max-width:320px;transform:translateY(15px);transition:transform .2s}
+    .modal-overlay.show .modal-card{transform:translateY(0)}
+    .submit-btn{width:100%;padding:17px;background:linear-gradient(135deg,#10a96e,#059669);color:#fff;border:none;border-radius:var(--radius-md);font-family:var(--font);font-size:15px;font-weight:700;cursor:pointer;transition:all .2s;box-shadow:0 6px 20px rgba(16,169,110,.25)}
+    .submit-btn:hover{transform:translateY(-1px);box-shadow:0 10px 28px rgba(16,169,110,.32)}
+    .submit-btn:active{transform:scale(.98)}
+    .submit-btn:disabled{opacity:.55;cursor:not-allowed;transform:none;box-shadow:none}
+
+    /* ─── HISTORY ─── */
+    .filter-row{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none}
+    .filter-row::-webkit-scrollbar{display:none}
+    .filter-chip{flex-shrink:0;padding:7px 14px;background:var(--surface);border:1.5px solid var(--border-2);border-radius:99px;font-size:12px;font-weight:600;color:var(--text-sub);cursor:pointer;transition:all .2s;font-family:var(--font)}
+    .filter-chip.active{background:var(--green-dim);border-color:rgba(16,169,110,.35);color:var(--green)}
+    .history-month-group{display:flex;flex-direction:column;gap:10px}
+    .month-label{font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--text-muted);padding:0 4px}
+    .history-day-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-md);overflow:hidden;box-shadow:var(--shadow-sm)}
+    .history-day-header{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .15s}
+    .history-day-header:hover{background:var(--surface-2)}
+    .history-day-date{font-size:13px;font-weight:700;color:var(--text)}
+    .history-day-sub{font-size:11px;color:var(--text-muted);font-family:var(--font-mono);margin-top:1px}
+    .history-day-total{font-size:15px;font-weight:700;font-family:var(--font-mono);color:var(--green)}
+    .history-day-total.over{color:var(--red)}
+    .history-day-total.close{color:var(--amber)}
+    .history-day-body{display:none}
+    .history-day-body.open{display:block}
+    .history-row{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--border);font-size:15px}
+    .history-row:last-child{border-bottom:none}
+    .history-row-time{font-family:var(--font-mono);font-size:13px;color:var(--text-muted);min-width:48px}
+    .history-row-name{flex:1;color:var(--text-sub);line-height:1.4}
+    .history-row-cal{font-family:var(--font-mono);font-weight:700;color:var(--text);font-size:16px}
+    .history-row-note{font-size:15px;color:#065f46;background:var(--green-light);margin:0 16px 14px;padding:12px 16px;border-radius:8px;line-height:1.6;white-space:pre-wrap}
+    .delete-btn{background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:16px;padding:10px 15px;margin-left:4px;border-radius:8px;transition:all .2s;display:flex;align-items:center;justify-content:center;-webkit-tap-highlight-color:transparent}
+    .delete-btn:active{background:var(--red-dim);color:var(--red);transform:scale(0.9)}
+    .history-loading{text-align:center;padding:40px;color:var(--text-muted);font-size:13px}
+    .history-empty{text-align:center;padding:48px 16px;color:var(--text-muted);font-size:14px}
+    .summary-bar{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-md);padding:16px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;box-shadow:var(--shadow-card)}
+    .summary-item{text-align:center}
+    .summary-item-label{font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted);margin-bottom:5px}
+    .summary-item-val{font-size:20px;font-weight:700;font-family:var(--font-mono);color:var(--text)}
+    .export-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:11px;background:none;border:1.5px solid var(--border-2);border-radius:var(--radius-md);font-family:var(--font);font-size:13px;font-weight:600;color:var(--text-sub);cursor:pointer;transition:all .2s}
+    .export-btn:hover{border-color:var(--green);color:var(--green);background:var(--green-dim)}
+
+    /* ─── SPINNER ─── */
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .spinner{display:inline-block;width:14px;height:14px;border:2px solid currentColor;border-top-color:transparent;border-radius:50%;animation:spin .7s linear infinite}
+
+    /* ─── FOOTER ─── */
+    .footer{text-align:center;font-size:10px;color:var(--text-muted);letter-spacing:.1em;text-transform:uppercase;padding:8px 0 0}
+    .footer span{color:var(--text-sub)}
+
+    /* ─── TOAST ─── */
+    .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(16px);background:var(--text);border-radius:99px;padding:12px 22px;font-size:13px;font-weight:600;color:#fff;box-shadow:0 8px 32px rgba(0,0,0,.2);z-index:100;opacity:0;transition:all .35s cubic-bezier(.16,1,.3,1);white-space:nowrap;pointer-events:none}
+    .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+    .chevron{font-size:12px;color:var(--text-muted);transition:transform .2s}
+    .chevron.open{transform:rotate(180deg)}
+
+    /* ─── WEIGHT ─── */
+    .weight-hero{background:linear-gradient(135deg,#10a96e,#059669);border-radius:var(--radius-lg);padding:24px 20px;color:#fff;display:flex;align-items:center;justify-content:space-between;box-shadow:0 8px 24px rgba(16,169,110,.28)}
+    .weight-hero-label{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;opacity:.75;margin-bottom:6px}
+    .weight-hero-val{font-size:52px;font-weight:700;font-family:var(--font-mono);line-height:1}
+    .weight-hero-unit{font-size:18px;font-weight:500;opacity:.8;margin-left:4px}
+    .weight-hero-diff{font-size:13px;margin-top:6px;opacity:.85;font-weight:600}
+    .weight-bmi-label{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;opacity:.7;margin-bottom:4px}
+    .weight-bmi-val{font-size:28px;font-weight:700;font-family:var(--font-mono)}
+    .weight-bmi-cat{font-size:12px;margin-top:3px;opacity:.85;font-weight:600}
+    .weight-stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .weight-stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-md);padding:14px 16px;box-shadow:var(--shadow-card)}
+    .weight-stat-label{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted);margin-bottom:6px}
+    .weight-stat-val{font-size:22px;font-weight:700;font-family:var(--font-mono);color:var(--text)}
+    .weight-stat-sub{font-size:11px;color:var(--text-muted);margin-top:2px}
+    .predict-card{background:var(--surface);border:1.5px solid rgba(16,169,110,.25);border-radius:var(--radius-lg);padding:18px 20px;box-shadow:var(--shadow-card)}
+    .predict-header{display:flex;align-items:center;gap:8px;margin-bottom:14px}
+    .predict-title{font-size:13px;font-weight:700;color:var(--text)}
+    .predict-rows{display:flex;flex-direction:column;gap:10px}
+    .predict-row{display:flex;align-items:center;justify-content:space-between}
+    .predict-row-label{font-size:12px;color:var(--text-sub)}
+    .predict-row-val{font-size:14px;font-weight:700;font-family:var(--font-mono);color:var(--green)}
+    .predict-row-val.red{color:var(--red)}
+    .predict-row-val.amber{color:var(--amber)}
+    .predict-divider{height:1px;background:var(--border);margin:4px 0}
+    .predict-goal-date{text-align:center;padding:12px;background:var(--green-dim);border-radius:var(--radius-md);margin-top:4px}
+    .predict-goal-date-label{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--green);margin-bottom:4px}
+    .predict-goal-date-val{font-size:18px;font-weight:700;color:var(--green)}
+    .weight-input-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+    .weight-number-input{width:100%;padding:13px;background:var(--surface-2);border:1.5px solid var(--border-2);border-radius:var(--radius-md);font-size:24px;font-weight:700;font-family:var(--font-mono);text-align:center;color:var(--text);outline:none;transition:border-color .2s}
+    .weight-number-input:focus{border-color:var(--green);background:#fff}
+    .weight-number-input::-webkit-inner-spin-button,.weight-number-input::-webkit-outer-spin-button{-webkit-appearance:none}
+    .weight-save-btn{width:100%;padding:15px;background:linear-gradient(135deg,#10a96e,#059669);color:#fff;border:none;border-radius:var(--radius-md);font-family:var(--font);font-size:14px;font-weight:700;cursor:pointer;transition:all .2s;box-shadow:0 4px 16px rgba(16,169,110,.25)}
+    .weight-save-btn:hover{transform:translateY(-1px)}
+    .weight-save-btn:disabled{opacity:.55;cursor:not-allowed;transform:none}
+    .range-toggle{display:flex;background:var(--surface-3);border-radius:var(--radius-sm);padding:3px;gap:3px;margin-bottom:14px}
+    .range-btn{flex:1;padding:7px;background:none;border:none;border-radius:7px;font-family:var(--font);font-size:12px;font-weight:600;color:var(--text-muted);cursor:pointer;transition:all .2s}
+    .range-btn.active{background:var(--surface);color:var(--text);box-shadow:var(--shadow-sm)}
+    .no-weight-hint{text-align:center;padding:40px 16px;color:var(--text-muted);font-size:14px}
+    .no-weight-icon{font-size:36px;margin-bottom:10px;opacity:.5}
+  </style>
+</head>
+<body>
+
+<!-- ══ LOGIN ══ -->
+<div id="loginView">
+  <div class="login-wrap">
+    <div class="login-logo-wrap"><div class="login-logo">💚</div></div>
+    <div class="login-title">永森健康管理</div>
+    <div class="login-sub">智慧飲食追蹤系統</div>
+    <div class="login-card">
+      <div class="pin-label">個人密碼</div>
+      <input type="text" id="loginPass" class="login-input" placeholder="••••" maxlength="8" inputmode="numeric" autofocus style="-webkit-text-security: disc;">
+      <button class="login-btn" id="loginBtn">進入系統</button>
+      <div class="login-err" id="loginErr"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MAIN ══ -->
+<div id="mainView" class="hidden">
+
+<div class="sticky-shell">
+  <div class="header">
+    <div class="header-inner">
+      <div class="header-row1">
+        <div class="greeting">您好，<strong id="userDisplayName"></strong></div>
+        <div style="display:flex;gap:8px">
+          <button class="logout-btn" id="createAccountBtn">建立帳號</button>
+          <button class="logout-btn" id="changePwdBtn">修改密碼</button>
+          <button class="logout-btn" id="logoutBtn">登出</button>
+        </div>
+      </div>
+      <div class="header-stats">
+        <div class="ring-wrap" id="ringWrap">
+          <svg class="ring-svg" viewBox="0 0 88 88" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="ringGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="var(--green)" />
+                <stop offset="100%" stop-color="#34d399" />
+              </linearGradient>
+            </defs>
+            <circle class="ring-bg" cx="44" cy="44" r="36"/>
+            <circle class="ring-fill" id="ringFill" cx="44" cy="44" r="36" stroke="url(#ringGradient)"/>
+          </svg>
+          <div class="ring-center">
+            <div class="ring-pct" id="ringPct">0%</div>
+            <div class="ring-label">今日</div>
+          </div>
+        </div>
+        <div class="stat-stack">
+          <div class="stat-row-item">
+            <div class="stat-tag">攝取</div>
+            <div class="stat-val green" id="totalCal">0</div>
+            <div class="stat-unit">kcal</div>
+          </div>
+          <div class="stat-row-item">
+            <div class="stat-tag">剩餘</div>
+            <div class="stat-val blue" id="remainCal">--</div>
+            <div class="stat-unit">kcal</div>
+          </div>
+          <div class="streak-badge hidden" id="streakBadge">
+            🔥 <span id="streakNum">0</span> 天連續記錄
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tab-nav-wrap">
+    <div class="tab-nav">
+      <button class="tab-btn active" data-tab="dashboard"><span class="tab-icon">📊</span>今日</button>
+      <button class="tab-btn" data-tab="record"><span class="tab-icon">✏️</span>記錄</button>
+      <button class="tab-btn" data-tab="history"><span class="tab-icon">📅</span>歷史</button>
+      <button class="tab-btn" data-tab="weight"><span class="tab-icon">🔥</span>TDEE<br>計算</button>
+    </div>
+  </div>
+</div>
+
+  <div class="content">
+
+    <!-- ── TODAY ── -->
+    <div class="tab-pane active" id="tab-dashboard">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">近七日攝取趨勢</div>
+          <div class="card-badge">本週</div>
+        </div>
+        <div class="chart-wrap loading" id="chartWrap">
+          <div class="chart-skeleton" id="chartSkeleton">
+            <div class="skeleton chart-skel-bar" style="height:45%"></div>
+            <div class="skeleton chart-skel-bar" style="height:72%"></div>
+            <div class="skeleton chart-skel-bar" style="height:58%"></div>
+            <div class="skeleton chart-skel-bar" style="height:90%"></div>
+            <div class="skeleton chart-skel-bar" style="height:63%"></div>
+            <div class="skeleton chart-skel-bar" style="height:38%"></div>
+            <div class="skeleton chart-skel-bar" style="height:80%"></div>
+          </div>
+          <canvas id="trendChart"></canvas>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="card-title">今日飲食紀錄</div></div>
+        <div id="todayLog">
+          <div id="logSkeleton">
+            <div class="skel-row">
+              <div class="skeleton" style="width:7px;height:7px;border-radius:50%;flex-shrink:0"></div>
+              <div class="skeleton" style="flex:1;height:13px"></div>
+              <div class="skeleton" style="width:60px;height:13px;margin-left:8px"></div>
+            </div>
+            <div class="skel-row">
+              <div class="skeleton" style="width:7px;height:7px;border-radius:50%;flex-shrink:0"></div>
+              <div class="skeleton" style="width:55%;height:13px"></div>
+              <div class="skeleton" style="width:60px;height:13px;margin-left:8px"></div>
+            </div>
+            <div class="skel-row">
+              <div class="skeleton" style="width:7px;height:7px;border-radius:50%;flex-shrink:0"></div>
+              <div class="skeleton" style="width:70%;height:13px"></div>
+              <div class="skeleton" style="width:60px;height:13px;margin-left:8px"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── RECORD ── -->
+    <div class="tab-pane" id="tab-record">
+      <div class="input-card">
+        <div class="section-title">新增飲食紀錄</div>
+
+        <div class="field-label">紀錄日期</div>
+        <input type="date" id="recordDateInput" class="food-input" style="margin-bottom:12px;padding:10px 15px">
+
+        <div class="img-mode-toggle">
+          <button class="img-mode-btn active" id="modeText" onclick="setMode('text')">✏️ 文字輸入</button>
+          <button class="img-mode-btn" id="modeImg" onclick="setMode('image')">📷 拍照辨識</button>
+        </div>
+
+        <div id="textInputArea">
+          <textarea id="foodInput" class="food-input" rows="2" placeholder="例如：半碗糙米飯、滷雞腿一份、無糖豆漿 240ml…"></textarea>
+        </div>
+
+        <div id="imageInputArea" style="display:none">
+          <div class="img-upload-area" id="imgUploadArea">
+            <img id="imgPreview" class="img-preview" alt="預覽">
+            <div class="img-placeholder" id="imgPlaceholder">
+              <div class="img-placeholder-icon">📸</div>
+              <div class="img-placeholder-text">請選擇上傳方式</div>
+              <div style="display:flex; gap:10px; justify-content:center; margin-top:12px; padding:0 20px;">
+                <button class="ai-btn" style="flex:1; background:var(--green-dim); border-color:var(--green); color:var(--green);" onclick="document.getElementById('cameraInput').click()">📷 拍照</button>
+                <button class="ai-btn" style="flex:1; background:var(--blue-dim); border-color:var(--blue); color:var(--blue);" onclick="document.getElementById('galleryInput').click()">🖼️ 相簿</button>
+              </div>
+              <div class="img-placeholder-sub" style="margin-top:15px">支援 JPG、PNG、HEIC</div>
+            </div>
+            <!-- 隱藏的檔案輸入框 -->
+            <input type="file" id="cameraInput" accept="image/*" capture="environment" style="display:none">
+            <input type="file" id="galleryInput" accept="image/*" style="display:none">
+          </div>
+          <!-- 重選按鈕 (僅在有圖片時顯示) -->
+          <button id="reSelectBtn" class="ai-btn hidden" style="width:100%; margin-top:8px; background:var(--surface-3); border-color:var(--border-2); color:var(--text-sub)">↺ 重新選擇 / 拍照</button>
+        </div>
+
+        <div class="ai-row">
+          <button class="ai-btn" id="aiBtn">
+            <span id="aiLoader" class="spinner hidden"></span>
+            <span id="aiLabel">✦ AI 智慧分析熱量</span>
+          </button>
+          <button class="retry-btn hidden" id="retryBtn" title="重新分析">↺ 重試</button>
+        </div>
+
+        <div class="calrow">
+          <div>
+            <div class="field-label">熱量 kcal</div>
+            <input type="number" id="calInput" class="cal-input" placeholder="0">
+          </div>
+          <div>
+            <div class="field-label">AI 營養建議</div>
+            <div class="note-box" id="noteOutput">輸入食物後點擊 AI 分析</div>
+          </div>
+        </div>
+        <button class="submit-btn" id="submitBtn">寫入雲端紀錄</button>
+      </div>
+      <div class="footer"><span>Yong Sen Health</span> · v1.1</div>
+    </div>
+
+    <!-- ── HISTORY ── -->
+    <div class="tab-pane" id="tab-history">
+      <div class="summary-bar">
+        <div class="summary-item"><div class="summary-item-label">紀錄天數</div><div class="summary-item-val" id="sumDays">--</div></div>
+        <div class="summary-item"><div class="summary-item-label">日均攝取</div><div class="summary-item-val" id="sumAvg">--</div></div>
+        <div class="summary-item"><div class="summary-item-label">超標天數</div><div class="summary-item-val" id="sumOver">--</div></div>
+      </div>
+      <div class="filter-row" id="historyFilters">
+        <button class="filter-chip active" data-range="7">近 7 天</button>
+        <button class="filter-chip" data-range="14">近 14 天</button>
+        <button class="filter-chip" data-range="30">近 30 天</button>
+        <button class="filter-chip" data-range="90">近 3 個月</button>
+        <button class="filter-chip" data-range="all">全部</button>
+      </div>
+      <div id="historyContent"><div class="history-loading">載入中…</div></div>
+      <button class="export-btn" id="exportBtn">↓ 匯出 CSV</button>
+    </div>
+
+    <!-- ── TDEE & BMI CALCULATOR ── -->
+    <div class="tab-pane" id="tab-weight">
+      <div class="weight-stats-grid" style="grid-template-columns: 1fr 1fr; margin-bottom: 14px; display: grid;">
+        <div class="weight-stat-card" style="background: linear-gradient(135deg, #3b82f6, #2563eb); color: #fff; border: none;">
+          <div class="weight-stat-label" style="color: rgba(255,255,255,0.8)">目前 TDEE</div>
+          <div class="weight-stat-val" id="displayTdee" style="color: #fff">--</div>
+          <div class="weight-stat-sub" style="color: rgba(255,255,255,0.7)">kcal / 日</div>
+        </div>
+        <div class="weight-stat-card" style="background: linear-gradient(135deg, #10a96e, #059669); color: #fff; border: none;">
+          <div class="weight-stat-label" style="color: rgba(255,255,255,0.8)">目前 BMI</div>
+          <div class="weight-stat-val" id="displayBmi" style="color: #fff">--</div>
+          <div class="weight-stat-sub" id="displayBmiCat" style="color: rgba(255,255,255,0.7)">--</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><div class="card-title">更新身體數據</div></div>
+        <div class="weight-input-row">
+          <div style="grid-column:span 2">
+            <div class="field-label">體重 (kg)</div>
+            <input type="number" id="weightInput" class="weight-number-input" step="0.1" min="20" max="300" placeholder="例如: 70.5">
+          </div>
+          <div>
+            <div class="field-label">身高 (cm)</div>
+            <input type="number" id="heightInput" class="weight-number-input" placeholder="170.0" step="0.1" min="50" max="250">
+          </div>
+          <div>
+            <div class="field-label">年齡</div>
+            <input type="number" id="ageInput" class="weight-number-input" placeholder="25" min="1" max="120">
+          </div>
+          <div>
+            <div class="field-label">性別</div>
+            <select id="genderInput" class="weight-number-input" style="font-size:16px;appearance:auto">
+              <option value="male">男生</option>
+              <option value="female">女生</option>
+            </select>
+          </div>
+          <div style="grid-column:span 2">
+            <div class="field-label">日常活動量</div>
+            <select id="activityInput" class="weight-number-input" style="font-size:16px;appearance:auto;text-align:left;padding-left:10px">
+              <option value="1.2">久坐 (辦公、幾乎不運動)</option>
+              <option value="1.375">輕度 (每週運動 1-3 天)</option>
+              <option value="1.55">中度 (每週運動 3-5 天)</option>
+              <option value="1.725">高度 (每週運動 6-7 天)</option>
+              <option value="1.9">極高 (重勞力工作、運動員)</option>
+            </select>
+          </div>
+        </div>
+        <button class="weight-save-btn" id="weightSaveBtn">💾 儲存並更新 TDEE</button>
+      </div>
+      
+      <div style="padding: 10px; text-align: center; color: var(--text-muted); font-size: 12px; line-height: 1.6;">
+        💡 系統將根據您的最新體重自動計算 TDEE，<br>這會直接影響首頁的剩餘熱量進度條。
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="modal-overlay" id="pwdModal">
+  <div class="card modal-card">
+    <div class="card-header"><div class="card-title">修改密碼</div></div>
+    <input type="text" id="newPwdInput" class="food-input" placeholder="請輸入新密碼" maxlength="12" inputmode="numeric" style="-webkit-text-security: disc;">
+    <div style="display:flex;gap:10px;margin-top:10px">
+      <button class="ai-btn" id="cancelPwdBtn" style="background:var(--surface-2);color:var(--text);border-color:var(--border-2)">取消</button>
+      <button class="submit-btn" id="savePwdBtn" style="padding:12px">儲存修改</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="createAccountModal">
+  <div class="card modal-card">
+    <div class="card-header"><div class="card-title">建立新帳號</div></div>
+    <div class="field-label">使用者名稱</div>
+    <input type="text" id="newUserNameInput" class="food-input" placeholder="例如: 小明" style="margin-bottom:10px">
+    <div class="field-label">設定密碼</div>
+    <input type="text" id="newUserPwdInput" class="food-input" placeholder="請輸入密碼" maxlength="12" inputmode="numeric" style="-webkit-text-security: disc;">
+    <div style="display:flex;gap:10px;margin-top:10px">
+      <button class="ai-btn" id="cancelCreateBtn" style="background:var(--surface-2);color:var(--text);border-color:var(--border-2)">取消</button>
+      <button class="submit-btn" id="confirmCreateBtn" style="padding:12px">確認建立</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ════════════════════════════════════════════
+   STATE
+════════════════════════════════════════════ */
+const GAS_WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbxP_abNl9ti5WsMTGDklQN_39PhVT0GmAdH4bOW-S_MxICzRzfGBJ7LEm_A4olcrnFe/exec'; // Replace with your deployed GAS Web App URL
+
+/**
+ * 呼叫 GAS 後端 API
+ */
+async function callApi(action, data) {
+  try {
+    const response = await fetch(GAS_WEBAPP_URL, {
+      method: 'POST',
+      mode: 'cors',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ action, data })
+    });
+    if (!response.ok) throw new Error('網路回應錯誤: ' + response.status);
+    return await response.json();
+  } catch (err) {
+    console.error('API 呼叫失敗:', err);
+    throw err;
+  }
+}
+
+var myChart         = null;
+var weightChart     = null;
+var currentUser     = '';
+var currentTdee     = 2000;
+var currentHeight   = 170;
+var currentAge      = 25;
+var currentGender   = 'male';
+var currentActivity = 1.2;
+var historyCache    = null;
+var historyLoaded   = false;
+var weightCache     = null;
+var weightTarget    = null;
+var todayLogCache   = [];
+var todayTotal      = 0;
+var lastAiCall      = 0;
+var currentMode     = 'text';
+var currentImageBase64 = null;
+var currentImageMime   = null;
+var toastTimer      = null;
+var RING_C          = 213.63;
+
+/* ── Placeholder note text（統一維護，不再散落處）── */
+var NOTE_PLACEHOLDER = '輸入食物後點擊 AI 分析';
+
+/* ════════════════════════════════════════════
+   HELPERS
+════════════════════════════════════════════ */
+function esc(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function showToast(msg, ms) {
+  var t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  if (toastTimer) clearTimeout(toastTimer);
+  toastTimer = setTimeout(function(){ t.classList.remove('show'); }, ms || 2800);
+}
+
+function animateNum(el, target) {
+  var dur = 700, t0 = performance.now();
+  (function step(now) {
+    var p = Math.min((now - t0) / dur, 1);
+    p = 1 - Math.pow(1 - p, 3);
+    el.textContent = Math.round(target * p);
+    if (p < 1) requestAnimationFrame(step);
+  })(t0);
+}
+
+/* ════════════════════════════════════════════
+   LOGIN
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+async function handleLogin() {
+  var pass = document.getElementById('loginPass').value.trim();
+  var btn  = document.getElementById('loginBtn');
+  var err  = document.getElementById('loginErr');
+  err.textContent = '';
+  if (!pass) { err.textContent = '請輸入密碼'; return; }
+  btn.textContent = '驗證中…'; btn.disabled = true;
+
+  try {
+    const res = await callApi('login', { password: pass });
+    if (res.success) {
+      currentUser   = res.userName;
+      currentTdee   = res.tdee   || 2000;
+      currentHeight = res.height || 170;
+      currentAge    = res.age    || 25;
+      currentGender = res.gender || 'male';
+      currentActivity = res.activity || 1.2;
+      
+      document.getElementById('userDisplayName').textContent = currentUser;
+      document.getElementById('heightInput').value = currentHeight;
+      document.getElementById('ageInput').value = currentAge;
+      document.getElementById('genderInput').value = currentGender;
+      document.getElementById('activityInput').value = currentActivity;
+
+      document.getElementById('loginView').classList.add('hidden');
+      document.getElementById('mainView').classList.remove('hidden');
+      renderAll(res.dashboard);
+    } else {
+      err.textContent = '❌ ' + res.msg;
+      btn.textContent = '進入系統'; btn.disabled = false;
+      document.getElementById('loginPass').value = '';
+    }
+  } catch (e) {
+    err.textContent = '🚨 ' + (e.message || '通訊失敗，請嘗試重新整理');
+    btn.textContent = '進入系統'; btn.disabled = false;
+  }
+}
+
+/* ════════════════════════════════════════════
+   RENDER ALL
+════════════════════════════════════════════ */
+function renderAll(data) {
+  if (!data) return;
+  var today = data.today || {}, trend = data.trend || {};
+  currentTdee   = trend.tdee || currentTdee;
+  todayTotal    = today.total || 0;
+  todayLogCache = data.todayLog || [];
+  updateRingStats(todayTotal, today.remain, today.percent, data.streak || 0);
+  renderChart(trend);
+  renderTodayLog(todayLogCache);
+}
+
+/* ════════════════════════════════════════════
+   RING + STATS
+════════════════════════════════════════════ */
+function updateRingStats(total, remain, pct, streak) {
+  if (remain == null) remain = currentTdee - total;
+  var actualPct = (total / currentTdee) * 100;
+  var displayPct = Math.min(actualPct, 100);
+
+  var ringWrap = document.getElementById('ringWrap');
+  var fill     = document.getElementById('ringFill');
+  var pctEl    = document.getElementById('ringPct');
+
+  // 圓周周長約 226.19 (2 * PI * 36)
+  var C = 226.19;
+  var offset = C * (1 - displayPct / 100);
+  fill.style.strokeDashoffset = offset;
+
+  // 根據百分比決定發光顏色與狀態
+  var glowColor = 'var(--green)';
+  var statusClass = '';
+  if (actualPct >= 100) {
+    glowColor = 'var(--red)';
+    statusClass = 'over';
+  } else if (actualPct >= 85) {
+    glowColor = 'var(--amber)';
+    statusClass = 'warn';
+  }
+
+  ringWrap.style.setProperty('--glow-color', glowColor);
+  ringWrap.className = 'ring-wrap ' + statusClass + (actualPct >= 85 ? ' breathing' : '');
+  pctEl.className = 'ring-pct ' + statusClass;
+
+  var t0 = performance.now();
+  (function step(now) {
+    var p = Math.min((now - t0) / 700, 1); p = 1 - Math.pow(1 - p, 3);
+    pctEl.textContent = Math.round(actualPct * p) + '%';
+    if (p < 1) requestAnimationFrame(step);
+  })(t0);
+
+  animateNum(document.getElementById('totalCal'), total);
+  var remEl = document.getElementById('remainCal');
+  animateNum(remEl, remain);
+  remEl.className = 'stat-val ' + (remain < 0 ? 'red' : remain < 300 ? 'amber' : 'blue');
+
+  var sb = document.getElementById('streakBadge');
+  if (streak >= 2) { sb.classList.remove('hidden'); document.getElementById('streakNum').textContent = streak; }
+  else sb.classList.add('hidden');
+}
+
+/* ════════════════════════════════════════════
+   CHART
+════════════════════════════════════════════ */
+function renderChart(trend) {
+  var labels = trend.labels || ['─','─','─','─','─','─','─'];
+  var values = trend.values || [0,0,0,0,0,0,0];
+  var tdee   = trend.tdee   || currentTdee;
+  var wrap   = document.getElementById('chartWrap');
+  var skel   = document.getElementById('chartSkeleton');
+  var ctx    = document.getElementById('trendChart').getContext('2d');
+
+  if (myChart) myChart.destroy();
+  myChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: labels,
+      datasets: [
+        { label: '攝取', data: values,
+          backgroundColor: values.map(function(v){ return v > tdee ? 'rgba(239,68,68,.65)' : 'rgba(16,169,110,.65)'; }),
+          borderRadius: 6, borderSkipped: false },
+        { label: 'TDEE', data: Array(7).fill(tdee), type: 'line',
+          borderColor: 'rgba(239,68,68,.35)', borderDash: [5,4],
+          pointRadius: 0, fill: false, borderWidth: 1.5 }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      animation: { onComplete: function(){ skel.style.display = 'none'; wrap.classList.remove('loading'); } },
+      plugins: { legend: { display: false }, tooltip: { callbacks: { label: function(c){ return c.dataset.label + ': ' + c.parsed.y + ' kcal'; } } } },
+      scales: {
+        y: { display: false, beginAtZero: true },
+        x: { grid: { display: false }, ticks: { font: { size: 10, family: "'DM Mono',monospace" }, color: '#9ca3af' } }
+      }
+    }
+  });
+}
+
+/* ════════════════════════════════════════════
+   TODAY LOG
+════════════════════════════════════════════ */
+function renderTodayLog(logs) {
+  var el = document.getElementById('todayLog');
+  if (!logs || !logs.length) {
+    el.innerHTML = '<div class="log-empty"><div class="log-empty-icon">🍽️</div>今日尚無飲食紀錄</div>';
+    return;
+  }
+  var html = '<div class="log-list">';
+  logs.forEach(function(item, idx) {
+    html += '<div class="log-item" style="animation-delay:' + (idx * .05) + 's">' +
+      '<div class="log-dot"></div>' +
+      '<div class="log-name">' + esc(item.name) + '</div>' +
+      '<div class="log-time">' + esc(item.time || '') + '</div>' +
+      '<div class="log-cal">' + item.cal + ' kcal</div>' +
+    '</div>';
+  });
+  html += '</div>';
+  el.innerHTML = html;
+}
+
+/* ════════════════════════════════════════════
+   APPLY NEW ENTRY（增量更新，不需重讀 Sheet）
+════════════════════════════════════════════ */
+function applyNewEntry(entry) {
+  todayTotal += entry.cal;
+  todayLogCache.unshift(entry);
+  var remain = currentTdee - todayTotal;
+  var pct    = Math.min((todayTotal / currentTdee) * 100, 100);
+  updateRingStats(todayTotal, remain, pct, 0);
+  renderTodayLog(todayLogCache);
+  if (myChart) {
+    var ds = myChart.data.datasets[0];
+    ds.data[6] += entry.cal;
+    ds.backgroundColor[6] = ds.data[6] > currentTdee ? 'rgba(239,68,68,.65)' : 'rgba(16,169,110,.65)';
+    myChart.update('none');
+  }
+}
+
+/* ════════════════════════════════════════════
+   INPUT MODE
+════════════════════════════════════════════ */
+function setMode(mode) {
+  currentMode = mode;
+  document.getElementById('modeText').classList.toggle('active', mode === 'text');
+  document.getElementById('modeImg').classList.toggle('active', mode === 'image');
+  document.getElementById('textInputArea').style.display  = mode === 'text'  ? '' : 'none';
+  document.getElementById('imageInputArea').style.display = mode === 'image' ? '' : 'none';
+  document.getElementById('calInput').value = '';
+  resetNoteBox();
+}
+
+function resetNoteBox() {
+  var el = document.getElementById('noteOutput');
+  el.className        = 'note-box';
+  el.textContent      = NOTE_PLACEHOLDER;
+  el.dataset.plainNote = '';
+  document.getElementById('retryBtn').classList.add('hidden');
+}
+
+/* ════════════════════════════════════════════
+   AI ANALYZE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+async function runAI(force) {
+  var btn      = document.getElementById('aiBtn');
+  var loader   = document.getElementById('aiLoader');
+  var label    = document.getElementById('aiLabel');
+  var retryBtn = document.getElementById('retryBtn');
+  var noteEl   = document.getElementById('noteOutput');
+
+  // 安全解鎖：若按鈕卡住超過 30 秒，自動恢復
+  if (btn.disabled && Date.now() - lastAiCall > 30000) {
+    btn.disabled = false; loader.classList.add('hidden'); label.textContent = '✦ AI 智慧分析熱量';
+  }
+
+  var cooldown = 10000;
+  if (!force && Date.now() - lastAiCall < cooldown) {
+    showToast('⏳ 請等待 ' + Math.ceil((cooldown - (Date.now() - lastAiCall)) / 1000) + ' 秒後再分析');
+    return;
+  }
+
+  if (currentMode === 'text'  && !document.getElementById('foodInput').value.trim()) { showToast('⚠️ 請先輸入食物內容'); return; }
+  if (currentMode === 'image' && !currentImageBase64) { showToast('⚠️ 請先選擇或拍攝一張食物照片'); return; }
+
+  lastAiCall = Date.now();
+  loader.classList.remove('hidden'); label.textContent = '分析中…';
+  btn.disabled = true; retryBtn.classList.add('hidden');
+  noteEl.className = 'note-box'; noteEl.textContent = 'AI 分析中…'; noteEl.dataset.plainNote = '';
+
+  try {
+    let res;
+    if (currentMode === 'image') {
+      res = await callApi('analyzeFoodImage', { base64Data: currentImageBase64, mimeType: currentImageMime, userName: currentUser });
+    } else {
+      res = await callApi('analyzeFood', { foodText: document.getElementById('foodInput').value.trim(), userName: currentUser });
+    }
+
+    loader.classList.add('hidden'); label.textContent = '✦ AI 智慧分析熱量'; btn.disabled = false;
+    if (res && res.calories) {
+      document.getElementById('calInput').value = res.calories;
+      if (res.detectedFoods) document.getElementById('foodInput').value = res.detectedFoods;
+      var conf = res.confidence === 'high' ? '✅ 高把握' : res.confidence === 'medium' ? '⚠️ 中把握' : '❓ 低把握';
+      var plainNote = res.note || '分析完成';
+      noteEl.dataset.plainNote = plainNote;
+      noteEl.className = 'note-box';
+      noteEl.innerHTML =
+        '<div style="font-size:10px;color:#9ca3af;margin-bottom:4px">' + conf + '</div>' + plainNote;
+      retryBtn.classList.add('hidden');
+    } else {
+      noteEl.className = 'note-box error';
+      noteEl.textContent = res.note || '分析失敗';
+      noteEl.dataset.plainNote = '';
+      retryBtn.classList.remove('hidden');
+    }
+  } catch (e) {
+    loader.classList.add('hidden'); label.textContent = '✦ AI 智慧分析熱量'; btn.disabled = false;
+    noteEl.className = 'note-box error';
+    noteEl.textContent = '通訊失敗：' + (e.message || '請稍後再試');
+    noteEl.dataset.plainNote = '';
+    retryBtn.classList.remove('hidden');
+  }
+}
+
+/* ════════════════════════════════════════════
+   SUBMIT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+async function submitData() {
+  var meal = currentMode === 'image'
+    ? (document.getElementById('foodInput').value.trim() || 'AI辨識餐點')
+    : document.getElementById('foodInput').value.trim();
+
+  var cal = parseInt(document.getElementById('calInput').value, 10);
+  if (!meal || isNaN(cal) || cal <= 0) { showToast('⚠️ 請確認餐點已填寫，且熱量為有效數字'); return; }
+
+  // ── 攝取警告 ──
+  var totalAfter = todayTotal + cal;
+  if (totalAfter >= currentTdee) {
+    if (!confirm('⚠️ 攝取量將超越 TDEE！超過就會變胖喔！\n確定要記錄嗎？')) return;
+  } else if (totalAfter >= currentTdee * 0.9) {
+    if (!confirm('⚠️ 攝取量快超越 TDEE 了！超過就會變胖喔！\n確定要記錄嗎？')) return;
+  }
+
+  var note    = document.getElementById('noteOutput').dataset.plainNote || '';
+  var recDate = document.getElementById('recordDateInput').value;
+  var btn     = document.getElementById('submitBtn');
+  btn.textContent = '寫入中…'; btn.disabled = true;
+
+  try {
+    const res = await callApi('saveData', { mealName: meal, calories: cal, note: note, currentUser: currentUser, date: recDate });
+    btn.textContent = '寫入雲端紀錄'; btn.disabled = false;
+    var todayStr = new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().split('T')[0];
+    if (res.newEntry.dateStr === todayStr) applyNewEntry(res.newEntry);
+    document.getElementById('foodInput').value = '';
+    document.getElementById('calInput').value  = '';
+    resetNoteBox();
+    historyLoaded = false; historyCache = null;
+    showToast('✅ 已成功記錄 ' + cal + ' kcal！');
+    if (navigator.vibrate) navigator.vibrate([10, 20, 10]);
+  } catch (e) {
+    showToast('🚨 ' + e.message);
+    btn.textContent = '寫入雲端紀錄'; btn.disabled = false;
+  }
+}
+
+/* ════════════════════════════════════════════
+   HISTORY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+async function loadHistory(range) {
+  document.getElementById('historyContent').innerHTML = '<div class="history-loading">載入中…</div>';
+  try {
+    const res = await callApi('getHistory', { userName: currentUser });
+    historyCache  = res;
+    historyLoaded = true;
+    renderHistory(res, range || 7);
+  } catch (err) {
+    document.getElementById('historyContent').innerHTML = '<div class="history-empty">載入失敗，請稍後再試</div>';
+  }
+}
+
+function renderHistory(data, range) {
+  var el = document.getElementById('historyContent');
+  if (!data || !data.length) { el.innerHTML = '<div class="history-empty">尚無歷史紀錄</div>'; return; }
+
+  var cutoff = null;
+  if (range !== 'all') {
+    cutoff = new Date(Date.now() - (parseInt(range) - 1) * 86400000);
+    cutoff.setHours(0, 0, 0, 0);
+  }
+
+  var grouped = {}, dateSet = [];
+  data.forEach(function(item) {
+    var d = new Date(item.dateStr + 'T00:00:00');
+    if (cutoff && d < cutoff) return;
+    if (!grouped[item.dateStr]) { grouped[item.dateStr] = []; dateSet.push(item.dateStr); }
+    grouped[item.dateStr].push(item);
+  });
+
+  if (!dateSet.length) { el.innerHTML = '<div class="history-empty">此區間無紀錄</div>'; updateHistorySummary(0,0,0); return; }
+
+  var filteredTotal = 0, overDays = 0;
+  dateSet.forEach(function(ds) {
+    var t = grouped[ds].reduce(function(s,i){ return s + i.cal; }, 0);
+    filteredTotal += t;
+    if (t > currentTdee) overDays++;
+  });
+  updateHistorySummary(dateSet.length, Math.round(filteredTotal / dateSet.length), overDays);
+
+  var frag   = document.createDocumentFragment();
+  var months = {};
+  dateSet.sort(function(a,b){ return b.localeCompare(a); }).forEach(function(ds) {
+    var mk = ds.substring(0, 7);
+    if (!months[mk]) months[mk] = [];
+    months[mk].push(ds);
+  });
+
+  Object.keys(months).sort(function(a,b){ return b.localeCompare(a); }).forEach(function(mk) {
+    var grp = document.createElement('div');
+    grp.className = 'history-month-group';
+    var d   = new Date(mk + '-01');
+    var lbl = document.createElement('div');
+    lbl.className   = 'month-label';
+    lbl.textContent = (d.getMonth() + 1) + '月 ' + d.getFullYear();
+    grp.appendChild(lbl);
+
+    months[mk].forEach(function(ds) {
+      var rows     = grouped[ds];
+      var dayTotal = rows.reduce(function(s,i){ return s + i.cal; }, 0);
+      var cls      = dayTotal > currentTdee ? 'over' : dayTotal > currentTdee * .9 ? 'close' : '';
+      var wd       = ['日','一','二','三','四','五','六'][new Date(ds + 'T12:00:00').getDay()];
+      var dDisp    = ds.substring(5).replace('-', '/') + '（' + wd + '）';
+
+      var card = document.createElement('div');
+      card.className = 'history-day-card';
+
+      var hdr = document.createElement('div');
+      hdr.className = 'history-day-header';
+      hdr.innerHTML =
+        '<div><div class="history-day-date">' + dDisp + '</div>' +
+        '<div class="history-day-sub">' + rows.length + ' 筆紀錄</div></div>' +
+        '<div style="display:flex;align-items:center;gap:10px">' +
+        '<div class="history-day-total ' + cls + '">' + dayTotal + ' kcal</div>' +
+        '<div class="chevron">▾</div></div>';
+      hdr.addEventListener('click', function(){ toggleDay(hdr); });
+      card.appendChild(hdr);
+
+      var body = document.createElement('div');
+      body.className = 'history-day-body';
+      rows.forEach(function(r) {
+        var row = document.createElement('div');
+        row.className = 'history-row';
+        row.innerHTML =
+          '<div class="history-row-time">' + (r.time || '--:--') + '</div>' +
+          '<div class="history-row-name">' + esc(r.name) + '</div>' +
+          '<div class="history-row-cal">' + r.cal + '</div>' +
+          '<button class="delete-btn" onclick="deleteHistoryRow(' + r.rowIndex + ')" title="刪除">✕</button>';
+        body.appendChild(row);
+        // 只顯示有內容的備註
+        if (r.note && r.note.trim()) {
+          var noteEl = document.createElement('div');
+          noteEl.className   = 'history-row-note';
+          noteEl.textContent = '💡 ' + r.note;
+          body.appendChild(noteEl);
+        }
+      });
+      card.appendChild(body);
+      grp.appendChild(card);
+    });
+    frag.appendChild(grp);
+  });
+
+  el.innerHTML = '';
+  el.appendChild(frag);
+}
+
+function toggleDay(h) {
+  var b = h.nextElementSibling;
+  var c = h.querySelector('.chevron');
+  b.classList.toggle('open');
+  c.classList.toggle('open');
+}
+
+function updateHistorySummary(days, avg, over) {
+  document.getElementById('sumDays').textContent = days || '--';
+  document.getElementById('sumAvg').textContent  = avg  || '--';
+  document.getElementById('sumOver').textContent = over != null ? over : '--';
+}
+
+/* ════════════════════════════════════════════
+   DELETE HISTORY ROW
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+async function deleteHistoryRow(rowIndex) {
+  if (!confirm('⚠️ 確定要刪除這筆紀錄嗎？\n刪除後數據將無法從雲端恢復。')) return;
+  try {
+    await callApi('deleteRecord', { rowIndex: rowIndex, userName: currentUser });
+    historyCache = null; historyLoaded = false;
+    var activeChip = document.querySelector('.filter-chip.active');
+    loadHistory(activeChip ? activeChip.dataset.range : '7');
+    showToast('✅ 紀錄已成功移除');
+  } catch (e) {
+    showToast('🚨 刪除失敗：' + e.message);
+  }
+}
+
+/* ════════════════════════════════════════════
+   EXPORT CSV
+════════════════════════════════════════════ */
+function exportCSV() {
+  if (!historyCache || !historyCache.length) { showToast('⚠️ 請先載入歷史紀錄'); return; }
+  var activeChip = document.querySelector('.filter-chip.active');
+  var range      = activeChip ? activeChip.dataset.range : 'all';
+  var cutoff     = null;
+  if (range !== 'all') {
+    cutoff = new Date(Date.now() - (parseInt(range) - 1) * 86400000);
+    cutoff.setHours(0, 0, 0, 0);
+  }
+  var dataToExport = cutoff
+    ? historyCache.filter(function(r){ return new Date(r.dateStr + 'T00:00:00') >= cutoff; })
+    : historyCache;
+  if (!dataToExport.length) { showToast('⚠️ 此篩選範圍無資料'); return; }
+
+  var rows = [['日期','時間','餐點','熱量(kcal)','備註']];
+  dataToExport.forEach(function(r){ rows.push([r.dateStr, r.time, r.name, r.cal, r.note]); });
+  var csv  = rows.map(function(r){ return r.map(function(c){ return '"' + String(c||'').replace(/"/g,'""') + '"'; }).join(','); }).join('\n');
+  var rangeLabel = range === 'all' ? '全部' : '近' + range + '天';
+  var blob = new Blob(['\ufeff' + csv], {type:'text/csv;charset=utf-8;'});
+  var url  = URL.createObjectURL(blob);
+  var a    = document.createElement('a');
+  a.href = url; a.download = currentUser + '_飲食紀錄_' + rangeLabel + '.csv'; a.click();
+  URL.revokeObjectURL(url);
+  showToast('✅ 匯出成功（' + rangeLabel + '，共 ' + dataToExport.length + ' 筆）');
+}
+
+/* ════════════════════════════════════════════
+   WEIGHT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+async function loadWeightData() {
+  try {
+    const res = await callApi('getWeightHistory', { userName: currentUser });
+    weightCache = res;
+    if (res.userHeight)   currentHeight = res.userHeight;
+    if (res.userAge)      currentAge = res.userAge;
+    if (res.userGender)   currentGender = res.userGender;
+    if (res.userActivity) currentActivity = res.userActivity;
+    
+    document.getElementById('heightInput').value = currentHeight;
+    document.getElementById('ageInput').value = currentAge;
+    document.getElementById('genderInput').value = currentGender;
+    document.getElementById('activityInput').value = currentActivity;
+
+    renderWeightUI(res);
+  } catch (e) {
+    showToast('🚨 身體數據載入失敗：' + e.message);
+  }
+}
+
+function renderWeightUI(data) {
+  var hasData = data && data.stats && data.stats.latest;
+  var latestWeight = hasData ? data.stats.latest : 0;
+  
+  document.getElementById('displayTdee').textContent = currentTdee;
+  
+  if (latestWeight > 0 && currentHeight > 0) {
+    var bmi = parseFloat((latestWeight / Math.pow(currentHeight / 100, 2)).toFixed(1));
+    document.getElementById('displayBmi').textContent = bmi;
+    var cat = bmi < 18.5 ? '體重過輕' : bmi < 24 ? '正常範圍' : bmi < 27 ? '過重' : '肥胖';
+    document.getElementById('displayBmiCat').textContent = cat;
+    document.getElementById('weightInput').value = latestWeight;
+  } else {
+    document.getElementById('displayBmi').textContent = '--';
+    document.getElementById('displayBmiCat').textContent = '尚未輸入數據';
+  }
+}
+
+function renderWeightChart(records, range) {
+  var filtered = records;
+  if (range !== 'all') {
+    var cutoff = new Date(Date.now() - (parseInt(range) - 1) * 86400000);
+    cutoff.setHours(0,0,0,0);
+    filtered = records.filter(function(r){ return new Date(r.date + 'T00:00:00') >= cutoff; });
+  }
+  if (!filtered.length) filtered = records;
+
+  var labels = filtered.map(function(r){ return r.date.substring(5).replace('-', '/'); });
+  var values = filtered.map(function(r){ return r.weight; });
+  var minW   = Math.min.apply(null, values) - 1;
+  var maxW   = Math.max.apply(null, values) + 1;
+
+  if (weightChart) weightChart.destroy();
+  var ctx = document.getElementById('weightChart').getContext('2d');
+  weightChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: labels,
+      datasets: [{
+        label: '體重', data: values,
+        borderColor: '#10a96e', backgroundColor: 'rgba(16,169,110,0.08)',
+        borderWidth: 2.5, fill: true, tension: 0.35,
+        pointRadius: filtered.length <= 14 ? 4 : 2,
+        pointBackgroundColor: '#10a96e'
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false }, tooltip: { callbacks: { label: function(c){ return c.parsed.y.toFixed(1) + ' kg'; } } } },
+      scales: {
+        y: {
+          min: Math.floor(minW * 10) / 10, max: Math.ceil(maxW * 10) / 10,
+          grid: { color: 'rgba(0,0,0,0.04)' },
+          ticks: { font: { size: 10, family: "'DM Mono',monospace" }, color: '#9ca3af', callback: function(v){ return v.toFixed(1); } }
+        },
+        x: { grid: { display: false }, ticks: { font: { size: 10, family: "'DM Mono',monospace" }, color: '#9ca3af', maxTicksLimit: 7 } }
+      }
+    }
+  });
+}
+
+async function saveWeightEntry() {
+  var w           = parseFloat(document.getElementById('weightInput').value);
+  var heightVal   = parseFloat(document.getElementById('heightInput').value);
+  var ageVal      = parseInt(document.getElementById('ageInput').value);
+  var genderVal   = document.getElementById('genderInput').value;
+  var activityVal = parseFloat(document.getElementById('activityInput').value);
+  var btn         = document.getElementById('weightSaveBtn');
+
+  if (isNaN(w) || w < 20 || w > 300) { showToast('⚠️ 請輸入有效體重（20–300 kg）'); return; }
+  if (isNaN(heightVal) || heightVal < 50 || heightVal > 250) { showToast('⚠️ 請輸入有效身高（50–250 cm）'); return; }
+  if (isNaN(ageVal) || ageVal < 1 || ageVal > 120) { showToast('⚠️ 請輸入有效年齡'); return; }
+
+  // ── 計算 TDEE ──
+  var bmr = (10 * w) + (6.25 * heightVal) - (5 * ageVal);
+  bmr = (genderVal === 'male') ? bmr + 5 : bmr - 161;
+  var calculatedTdee = Math.round(bmr * activityVal);
+
+  btn.textContent = '儲存中…'; btn.disabled = true;
+  try {
+    const res = await callApi('saveWeight', { 
+      weight: w, 
+      userName: currentUser, 
+      height: heightVal,
+      age: ageVal,
+      gender: genderVal,
+      activity: activityVal,
+      tdee: calculatedTdee
+    });
+    
+    btn.textContent = '💾 儲存並更新 TDEE'; btn.disabled = false;
+    showToast('✅ 更新成功！TDEE: ' + calculatedTdee + ' kcal');
+    
+    currentTdee = calculatedTdee;
+    currentHeight = heightVal;
+    currentAge = ageVal;
+    currentGender = genderVal;
+    currentActivity = activityVal;
+    
+    // 更新首頁熱量環
+    var remain = currentTdee - todayTotal;
+    var pct    = Math.min((todayTotal / currentTdee) * 100, 100);
+    updateRingStats(todayTotal, remain, pct, 0);
+
+    // 重新渲染本頁 UI
+    renderWeightUI({ stats: { latest: w } });
+
+    if (navigator.vibrate) navigator.vibrate([10,20,10]);
+  } catch (e) {
+    showToast('🚨 ' + e.message);
+    btn.textContent = '💾 儲存並更新 TDEE'; btn.disabled = false;
+  }
+}
+
+/* ════════════════════════════════════════════
+   TAB
+════════════════════════════════════════════ */
+function switchTab(id) {
+  document.querySelectorAll('.tab-btn').forEach(function(b){ b.classList.toggle('active', b.dataset.tab === id); });
+  document.querySelectorAll('.tab-pane').forEach(function(p){ p.classList.toggle('active', p.id === 'tab-' + id); });
+  if (id === 'history' && !historyLoaded) loadHistory(7);
+  if (id === 'weight'  && !weightCache)   loadWeightData();
+}
+
+/* ─── IMAGE PREVIEW (Moved to window.onload) ─── */
+
+/* ════════════════════════════════════════════
+   INIT
+════════════════════════════════════════════ */
+window.onload = function() {
+
+  /* ── 圖片處理核心 ── */
+  function handleImageFile(file) {
+    if (!file) return;
+    if (file.size > 8 * 1024 * 1024) { showToast('⚠️ 圖片過大，請選擇 8MB 以內的圖片'); return; }
+    
+    var reader = new FileReader();
+    reader.onload = function(ev) {
+      currentImageBase64 = ev.target.result;
+      currentImageMime   = file.type || 'image/jpeg';
+      
+      var preview = document.getElementById('imgPreview');
+      preview.src = currentImageBase64;
+      preview.classList.add('show');
+      
+      document.getElementById('imgPlaceholder').style.display = 'none';
+      document.getElementById('imgUploadArea').classList.add('has-img');
+      document.getElementById('reSelectBtn').classList.remove('hidden');
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function resetImage() {
+    currentImageBase64 = null;
+    currentImageMime   = null;
+    document.getElementById('imgPreview').src = '';
+    document.getElementById('imgPreview').classList.remove('show');
+    document.getElementById('imgPlaceholder').style.display = '';
+    document.getElementById('imgUploadArea').classList.remove('has-img');
+    document.getElementById('reSelectBtn').classList.add('hidden');
+    document.getElementById('cameraInput').value = '';
+    document.getElementById('galleryInput').value = '';
+  }
+
+  /* ── 綁定重選按鈕事件 ── */
+  document.getElementById('reSelectBtn').addEventListener('click', resetImage);
+
+  /* ── 圖片選取監聽 ── */
+  document.getElementById('cameraInput').addEventListener('change', function(e) { handleImageFile(e.target.files[0]); });
+  document.getElementById('galleryInput').addEventListener('change', function(e) { handleImageFile(e.target.files[0]); });
+
+  /* ── 日期預設為今天 ── */
+  var tzOffset = new Date().getTimezoneOffset() * 60000;
+  document.getElementById('recordDateInput').value = new Date(Date.now() - tzOffset).toISOString().split('T')[0];
+
+  /* ── 登入 ── */
+  document.getElementById('loginBtn').addEventListener('click', handleLogin);
+  document.getElementById('loginPass').addEventListener('keydown', function(e){ if (e.key === 'Enter') handleLogin(); });
+
+  /* ── 修改密碼 ── */
+  document.getElementById('changePwdBtn').addEventListener('click', function(){ document.getElementById('pwdModal').classList.add('show'); });
+  document.getElementById('cancelPwdBtn').addEventListener('click', function(){
+    document.getElementById('pwdModal').classList.remove('show');
+    document.getElementById('newPwdInput').value = '';
+  });
+
+  /* ── 建立帳號 ── */
+  document.getElementById('createAccountBtn').addEventListener('click', function(){
+    document.getElementById('createAccountModal').classList.add('show');
+  });
+  document.getElementById('cancelCreateBtn').addEventListener('click', function(){
+    document.getElementById('createAccountModal').classList.remove('show');
+    document.getElementById('newUserNameInput').value = '';
+    document.getElementById('newUserPwdInput').value = '';
+  });
+  document.getElementById('confirmCreateBtn').addEventListener('click', async function() {
+    var name = document.getElementById('newUserNameInput').value.trim();
+    var pwd  = document.getElementById('newUserPwdInput').value.trim();
+    if (!name || !pwd) { showToast('⚠️ 請填寫名稱與密碼'); return; }
+    
+    var btn = document.getElementById('confirmCreateBtn');
+    btn.textContent = '建立中...'; btn.disabled = true;
+    try {
+      const res = await callApi('createUser', { newUserName: name, newPassword: pwd });
+      btn.textContent = '確認建立'; btn.disabled = false;
+      if (res.success) {
+        showToast('✅ ' + res.msg);
+        document.getElementById('createAccountModal').classList.remove('show');
+        document.getElementById('newUserNameInput').value = '';
+        document.getElementById('newUserPwdInput').value = '';
+      } else {
+        showToast('🚨 ' + res.msg);
+      }
+    } catch (e) {
+      btn.textContent = '確認建立'; btn.disabled = false; showToast('🚨 ' + e.message);
+    }
+  });
+
+  document.getElementById('savePwdBtn').addEventListener('click', async function() {
+    var newPwd = document.getElementById('newPwdInput').value.trim();
+    if (!newPwd) { showToast('⚠️ 請輸入新密碼'); return; }
+    var btn = document.getElementById('savePwdBtn');
+    btn.textContent = '儲存中...'; btn.disabled = true;
+    try {
+      const res = await callApi('updatePassword', { userName: currentUser, newPassword: newPwd });
+      btn.textContent = '儲存修改'; btn.disabled = false;
+      if (res.success) {
+        showToast('✅ 密碼修改成功！下次請使用新密碼登入。');
+        document.getElementById('pwdModal').classList.remove('show');
+        document.getElementById('newPwdInput').value = '';
+      } else {
+        showToast('🚨 ' + res.msg);
+      }
+    } catch (e) {
+      btn.textContent = '儲存修改'; btn.disabled = false; showToast('🚨 ' + e.message);
+    }
+  });
+
+  /* ── 登出 ── */
+  document.getElementById('logoutBtn').addEventListener('click', function() {
+    if (myChart)     { myChart.destroy();     myChart     = null; }
+    if (weightChart) { weightChart.destroy(); weightChart = null; }
+    currentUser = ''; currentTdee = 2000; currentHeight = 170;
+    historyLoaded = false; historyCache = null;
+    todayLogCache = []; todayTotal = 0;
+    weightCache = null; weightTarget = null;
+    lastAiCall = 0; currentImageBase64 = null; currentImageMime = null;
+    document.getElementById('loginPass').value       = '';
+    document.getElementById('loginErr').textContent  = '';
+    document.getElementById('mainView').classList.add('hidden');
+    document.getElementById('loginView').classList.remove('hidden');
+    // 重置骨架屏
+    document.getElementById('chartSkeleton').style.display = '';
+    document.getElementById('chartWrap').classList.add('loading');
+    document.getElementById('todayLog').innerHTML =
+      '<div id="logSkeleton">' +
+        '<div class="skel-row"><div class="skeleton" style="width:7px;height:7px;border-radius:50%;flex-shrink:0"></div><div class="skeleton" style="flex:1;height:13px"></div><div class="skeleton" style="width:60px;height:13px;margin-left:8px"></div></div>' +
+        '<div class="skel-row"><div class="skeleton" style="width:7px;height:7px;border-radius:50%;flex-shrink:0"></div><div class="skeleton" style="width:55%;height:13px"></div><div class="skeleton" style="width:60px;height:13px;margin-left:8px"></div></div>' +
+      '</div>';
+    setMode('text');
+    resetImage();
+    switchTab('dashboard');
+    var lb = document.getElementById('loginBtn'); lb.textContent = '進入系統'; lb.disabled = false;
+  });
+
+  /* ── AI + 提交 ── */
+  document.getElementById('aiBtn').addEventListener('click', function(){ runAI(false); });
+  document.getElementById('retryBtn').addEventListener('click', function(){ runAI(true); });
+  document.getElementById('submitBtn').addEventListener('click', submitData);
+
+  /* ── 歷史 ── */
+  document.getElementById('exportBtn').addEventListener('click', exportCSV);
+  document.querySelectorAll('.filter-chip').forEach(function(chip) {
+    chip.addEventListener('click', function() {
+      document.querySelectorAll('.filter-chip').forEach(function(c){ c.classList.remove('active'); });
+      chip.classList.add('active');
+      var range = chip.dataset.range;
+      if (historyCache) renderHistory(historyCache, range === 'all' ? 'all' : parseInt(range));
+      else loadHistory(range);
+    });
+  });
+
+  /* ── 體重 ── */
+  document.getElementById('weightSaveBtn').addEventListener('click', saveWeightEntry);
+
+  /* ── 分頁 ── */
+  document.querySelectorAll('.tab-btn').forEach(function(b) {
+    b.addEventListener('click', function(){ switchTab(b.dataset.tab); });
+  });
+};
+</script>
+</body>
+</html>
