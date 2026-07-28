@@ -1,35 +1,30 @@
 # FitLog AI
 
-> AI 健身追蹤 App — 跨領域作品（行動 App + AI 整合）
+> 永森健康管理系統 — AI 食物分析與健身追蹤（網頁 App + Google Apps Script 後端）
 
 ![FitLog AI 預覽](https://rock903400-byte.github.io/wind/assets/fitlog-ai.webp)
 
-## 📖 背景
+## 功能
 
-多數健身紀錄 App 要求註冊帳號並上傳資料至雲端，重視隱私的使用者往往望而卻步。
-FitLog AI 以純本機方案解決這個問題：免登入即可記錄每次訓練的重量與次數，自動
-生成趨勢圖表，並結合 AI 教練根據你的歷史數據給出建議，讓訓練計畫有據可循。
+- 🔍 **AI 食物分析**：文字描述或拍照上傳，GPT-4o Vision 模型即時辨識食物並估算熱量，附營養師級建議
+- ⚖️ **體重追蹤**：記錄體重變化，自動計算 TDEE 與每日攝取目標
+- 📊 **每日儀表板**：今日攝取量、七日趨勢圖、連續記錄天數
+- 🔐 **帳號系統**：密碼登入、嘗試鎖定機制、多使用者支援
+- 📱 **手機最佳化**：響應式設計，以手機操作為主
 
-## 🎯 給誰用
+## 架構
 
-- 健身族群記錄訓練
-- 想看進度曲線的人
-- 重視隱私不想註冊的人
+| 層級 | 技術 |
+|---|---|
+| **Production 後端** | Google Apps Script + Google Sheets |
+| **AI 分析** | GitHub Models API — GPT-4o Vision（文字＋圖片） |
+| **Standalone 版** | HTML / CSS / JavaScript（SPA）+ LocalStorage（GitHub Pages） |
 
-## ✨ 功能
+Production 版透過 Google Apps Script Web App 部署，後端連接 Google Sheets 作為資料庫，
+前端透過 GAS API 進行登入、紀錄、AI 分析等操作。GitHub Pages 版為純本機獨立版本，
+免登入、免後端，功能較精簡（無 AI 分析）。
 
-- 🏋️ 記錄訓練重量、次數與體重變化
-- 📊 自動繪製趨勢折線圖，成效一目了然
-- 🔒 免註冊免登入，資料存在本機（LocalStorage）
-- 📱 手機操作最佳化的介面
-
-## 🧰 技術棧
-
-- HTML / CSS / JavaScript（SPA）
-- LocalStorage 本機儲存
-- GitHub Pages 部署
-
-## 🌐 Demo
+## Demo
 
 https://rock903400-byte.github.io/FitLog-AI/
 
