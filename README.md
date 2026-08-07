@@ -1,5 +1,7 @@
 # FitLog AI
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+
 > 永森健康管理系統 — AI 食物分析與健身追蹤（網頁 App + Google Apps Script 後端）
 
 ![FitLog AI 預覽](https://rock903400-byte.github.io/wind/assets/fitlog-ai.webp)
